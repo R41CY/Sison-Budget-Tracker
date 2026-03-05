@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sison Financial Manager</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="description" content="Personal business financial tracker for the Sison family">
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1'/%3E%3Cstop offset='100%25' style='stop-color:%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='url(%23g)'/%3E%3Cpath d='M50 20v60M62 28H44a12 12 0 000 24h12a12 12 0 010 24H38' stroke='white' stroke-width='8' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Welcome Modal -->
+  <div id="welcomeModal" class="modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-container">
+      <div class="modal-content">
+        <button class="modal-close" id="closeWelcome">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+        <div class="modal-icon">💼</div>
+        <h2>Welcome to Sison Financial</h2>
+        <p>Your personal business finance manager. Track income, expenses, and calculate recipe costs with ease.</p>
+        
+        <div class="feature-grid">
+          <div class="feature-box">
+            <span class="feature-emoji">📊</span>
+            <span>Dashboard</span>
+          </div>
+          <div class="feature-box">
+            <span class="feature-emoji">💰</span>
+            <span>Transactions</span>
+          </div>
+          <div class="feature-box">
+            <span class="feature-emoji">🧾</span>
+            <span>Recipe Costing</span>
+          </div>
+          <div class="feature-box">
+            <span class="feature-emoji">📅</span>
+            <span>Daily Reports</span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <label class="checkbox-wrapper">
+            <input type="checkbox" id="dontShowAgain">
+            <span class="checkmark"></span>
+            <span>Don't show again</span>
+          </label>
+          <button class="btn btn-primary btn-lg" id="getStarted">Get Started</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div class="app">
+    
+    <!-- Mobile Header -->
+    <header class="mobile-header">
+      <button class="hamburger" id="menuToggle" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="mobile-brand">
+        <span class="mobile-logo">💼</span>
+        <span>Sison Financial</span>
+      </div>
+      <button class="icon-btn" id="mobileHelp" aria-label="Help">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <circle cx="12" cy="17" r="0.5" fill="currentColor"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-logo">💼</div>
+          <div class="brand-text">
+            <h1>Sison Financial</h1>
+            <p>Family Business</p>
+          </div>
+        </div>
+        <button class="close-btn" id="sidebarClose" aria-label="Close menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="nav">
+        <a href="#" class="nav-link active" data-page="dashboard">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7" rx="1"/>
+              <rect x="14" y="3" width="7" height="7" rx="1"/>
+              <rect x="3" y="14" width="7" height="7" rx="1"/>
+              <rect x="14" y="14" width="7" height="7" rx="1"/>
+            </svg>
+          </span>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="nav-link" data-page="transactions">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </span>
+          <span>Transactions</span>
+        </a>
+        <a href="#" class="nav-link" data-page="recipes">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+            </svg>
+          </span>
+          <span>Recipe Costing</span>
+        </a>
+        <a href="#" class="nav-link" data-page="daily">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </span>
+          <span>Daily Reports</span>
+        </a>
+        <a href="#" class="nav-link" data-page="guide">
+          <span class="nav-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <circle cx="12" cy="17" r="0.5" fill="currentColor"/>
+            </svg>
+          </span>
+          <span>User Guide</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-outline btn-block" id="exportAll">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Export Backup</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Main -->
+    <main class="main">
+      
+      <!-- Dashboard -->
+      <section id="page-dashboard" class="page active">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Dashboard</h1>
+            <p class="page-desc">Your financial overview at a glance</p>
+          </div>
+        </div>
+
+        <!-- Welcome Banner -->
+        <div id="welcomeBanner" class="welcome-banner">
+          <div class="welcome-content">
+            <h2>👋 Welcome to Sison Financial!</h2>
+            <p>Start by adding your first transaction. Go to <strong>Transactions</strong> and record your income or expenses.</p>
+            <button class="btn btn-white" onclick="navigateTo('transactions')">Add First Transaction</button>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-row">
+          <div class="stat-card gradient-purple">
+            <div class="stat-info">
+              <span class="stat-label">Net Profit</span>
+              <span class="stat-value">₱<span id="netProfit">0.00</span></span>
+            </div>
+            <div class="stat-icon-wrap">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-info">
+              <span class="stat-label">Total Income</span>
+              <span class="stat-value text-success">₱<span id="totalIncome">0.00</span></span>
+            </div>
+            <div class="stat-icon-wrap text-success">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                <polyline points="17 6 23 6 23 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-info">
+              <span class="stat-label">Total Expenses</span>
+              <span class="stat-value text-danger">₱<span id="totalExpense">0.00</span></span>
+            </div>
+            <div class="stat-icon-wrap text-danger">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+                <polyline points="17 18 23 18 23 12"/>
+              </svg>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-info">
+              <span class="stat-label">Current Balance</span>
+              <span class="stat-value">₱<span id="currentBalance">0.00</span></span>
+            </div>
+            <div class="stat-icon-wrap">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                <line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two Column -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h3>📅 Today's Summary</h3>
+              <span class="badge badge-neutral" id="todayDate"></span>
+            </div>
+            <div class="today-stats">
+              <div class="today-stat">
+                <span class="today-label">Income</span>
+                <span class="today-value text-success">₱<span id="todayIncome">0.00</span></span>
+              </div>
+              <div class="today-stat">
+                <span class="today-label">Expenses</span>
+                <span class="today-value text-danger">₱<span id="todayExpense">0.00</span></span>
+              </div>
+              <div class="today-stat">
+                <span class="today-label">Net</span>
+                <span class="today-value" id="todayNet">₱0.00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>📊 Quick Stats</h3>
+            </div>
+            <div class="quick-stats">
+              <div class="quick-stat">
+                <span class="quick-label">Transactions</span>
+                <span class="quick-value" id="statsTransactions">0</span>
+              </div>
+              <div class="quick-stat">
+                <span class="quick-label">Recipes</span>
+                <span class="quick-value" id="statsRecipes">0</span>
+              </div>
+              <div class="quick-stat">
+                <span class="quick-label">Avg Daily Expense</span>
+                <span class="quick-value">₱<span id="statsAvgExpense">0.00</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent -->
+        <div class="card">
+          <div class="card-header">
+            <h3>Recent Transactions</h3>
+            <button class="btn btn-sm btn-ghost" onclick="navigateTo('transactions')">View All →</button>
+          </div>
+          <div id="recentTransactions" class="transaction-list"></div>
+        </div>
+      </section>
+
+      <!-- Transactions -->
+      <section id="page-transactions" class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Transactions</h1>
+            <p class="page-desc">Track your income and expenses</p>
+          </div>
+          <button class="btn btn-outline btn-sm" id="exportTransactions">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export CSV
+          </button>
+        </div>
+
+        <!-- Balance Cards -->
+        <div class="balance-row">
+          <div class="balance-card">
+            <label>Opening Balance</label>
+            <div class="balance-input-wrap">
+              <span class="currency">₱</span>
+              <input type="number" id="openingBalance" placeholder="0.00" step="0.01" min="0">
+            </div>
+          </div>
+          <div class="balance-card">
+            <label>Income</label>
+            <div class="balance-value text-success">₱<span id="transIncome">0.00</span></div>
+          </div>
+          <div class="balance-card">
+            <label>Expenses</label>
+            <div class="balance-value text-danger">₱<span id="transExpense">0.00</span></div>
+          </div>
+          <div class="balance-card">
+            <label>Balance</label>
+            <div class="balance-value">₱<span id="transBalance">0.00</span></div>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div class="card">
+          <div class="card-header">
+            <h3 id="formTitle">➕ Add Transaction</h3>
+          </div>
+          <form id="transactionForm" class="form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Type</label>
+                <div class="select-wrap">
+                  <select id="transType" required>
+                    <option value="income">💵 Income</option>
+                    <option value="expense">💸 Expense</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="transDate" required>
+              </div>
+              <div class="form-group">
+                <label>Category</label>
+                <input type="text" id="transCategory" placeholder="e.g., Sales, Supplies, Rent" required list="categoryList">
+                <datalist id="categoryList"></datalist>
+              </div>
+              <div class="form-group">
+                <label>Amount (₱)</label>
+                <input type="number" id="transAmount" placeholder="0.00" step="0.01" min="0.01" required>
+              </div>
+              <div class="form-group full-width">
+                <label>Description</label>
+                <input type="text" id="transDescription" placeholder="What is this for?" required>
+              </div>
+              <div class="form-group full-width">
+                <label>Notes (Optional)</label>
+                <input type="text" id="transNotes" placeholder="Additional details">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="transSubmit">Add Transaction</button>
+              <button type="button" class="btn btn-ghost" id="transCancel" style="display:none;">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Filters -->
+        <div class="card">
+          <div class="card-header">
+            <h3>🔍 Filter</h3>
+            <button class="btn btn-sm btn-ghost" id="resetFilters">Reset</button>
+          </div>
+          <div class="filter-row">
+            <div class="select-wrap">
+              <select id="filterType">
+                <option value="all">All Types</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+              </select>
+            </div>
+            <div class="select-wrap">
+              <select id="filterCategory">
+                <option value="all">All Categories</option>
+              </select>
+            </div>
+            <div class="select-wrap">
+              <select id="filterMonth">
+                <option value="all">All Months</option>
+              </select>
+            </div>
+            <input type="text" id="filterSearch" placeholder="Search...">
+          </div>
+        </div>
+
+        <!-- List -->
+        <div class="card">
+          <div class="card-header">
+            <h3>All Transactions</h3>
+          </div>
+          <div id="transactionsList" class="transaction-list"></div>
+        </div>
+      </section>
+
+      <!-- Recipes -->
+      <section id="page-recipes" class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Recipe Costing</h1>
+            <p class="page-desc">Calculate costs and profit margins</p>
+          </div>
+          <button class="btn btn-outline btn-sm" id="exportRecipes">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export
+          </button>
+        </div>
+
+        <!-- Recipe Form -->
+        <div class="card">
+          <div class="card-header">
+            <h3 id="recipeFormTitle">🍳 Create Recipe</h3>
+          </div>
+          <form id="recipeForm" class="form">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label>Recipe Name</label>
+                <input type="text" id="recipeName" placeholder="e.g., Leche Flan, Siopao Asado" required>
+              </div>
+              <div class="form-group">
+                <label>Yield (pcs/servings)</label>
+                <input type="number" id="recipeYield" placeholder="e.g., 12" min="1" required>
+              </div>
+              <div class="form-group">
+                <label>Selling Price per Unit (₱)</label>
+                <input type="number" id="recipePrice" placeholder="e.g., 50" step="0.01" min="0" required>
+              </div>
+            </div>
+
+            <div class="section-title">
+              <h4>📦 Add Ingredients</h4>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Ingredient Name</label>
+                <input type="text" id="ingredientName" placeholder="e.g., All-purpose Flour">
+              </div>
+              <div class="form-group">
+                <label>Quantity</label>
+                <input type="number" id="ingredientQty" placeholder="e.g., 500" step="0.01">
+              </div>
+              <div class="form-group">
+                <label>Unit</label>
+                <input type="text" id="ingredientUnit" placeholder="g, kg, pcs, ml">
+              </div>
+              <div class="form-group">
+                <label>Cost (₱)</label>
+                <input type="number" id="ingredientCost" placeholder="e.g., 45" step="0.01">
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-outline btn-block" id="addIngredient">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="16"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+              Add Ingredient
+            </button>
+
+            <div id="ingredientsList" class="ingredients-list"></div>
+
+            <!-- Cost Summary -->
+            <div id="costSummary" class="cost-summary" style="display:none;">
+              <div class="cost-title">💰 Cost Breakdown</div>
+              <div class="cost-grid">
+                <div class="cost-item">
+                  <span>Total Ingredient Cost</span>
+                  <strong class="text-danger">₱<span id="recipeTotalCost">0.00</span></strong>
+                </div>
+                <div class="cost-item">
+                  <span>Cost per Unit</span>
+                  <strong>₱<span id="recipeCostPerUnit">0.00</span></strong>
+                </div>
+                <div class="cost-item">
+                  <span>Profit per Unit</span>
+                  <strong id="recipeProfitPerUnit" class="text-success">₱0.00</strong>
+                </div>
+                <div class="cost-item">
+                  <span>Profit Margin</span>
+                  <strong id="recipeProfitMargin">0%</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" id="recipeSubmit">Save Recipe</button>
+              <button type="button" class="btn btn-ghost" id="recipeCancel" style="display:none;">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Saved Recipes -->
+        <div class="card">
+          <div class="card-header">
+            <h3>📚 Saved Recipes</h3>
+          </div>
+          <div id="recipesList" class="recipes-grid"></div>
+        </div>
+      </section>
+
+      <!-- Daily -->
+      <section id="page-daily" class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Daily Reports</h1>
+            <p class="page-desc">View daily income and expense breakdown</p>
+          </div>
+        </div>
+
+        <!-- Date Range -->
+        <div class="card">
+          <div class="card-header">
+            <h3>📆 Select Date Range</h3>
+          </div>
+          <form id="dailyForm" class="form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>From</label>
+                <input type="date" id="dailyFrom" required>
+              </div>
+              <div class="form-group">
+                <label>To</label>
+                <input type="date" id="dailyTo" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Generate Report</button>
+          </form>
+        </div>
+
+        <!-- Period Summary -->
+        <div id="periodSummary" class="balance-row" style="display:none;">
+          <div class="balance-card">
+            <label>Period Income</label>
+            <div class="balance-value text-success">₱<span id="periodIncome">0.00</span></div>
+          </div>
+          <div class="balance-card">
+            <label>Period Expenses</label>
+            <div class="balance-value text-danger">₱<span id="periodExpense">0.00</span></div>
+          </div>
+          <div class="balance-card">
+            <label>Period Net</label>
+            <div class="balance-value" id="periodNetWrap">₱<span id="periodNet">0.00</span></div>
+          </div>
+          <div class="balance-card">
+            <label>Avg Daily Expense</label>
+            <div class="balance-value">₱<span id="periodAvg">0.00</span></div>
+          </div>
+        </div>
+
+        <!-- Daily List -->
+        <div id="dailyCard" class="card" style="display:none;">
+          <div class="card-header">
+            <h3>📋 Daily Breakdown</h3>
+          </div>
+          <div id="dailyList" class="daily-list"></div>
+        </div>
+      </section>
+
+      <!-- Guide -->
+      <section id="page-guide" class="page">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">📖 User Guide</h1>
+            <p class="page-desc">Complete guide for using Sison Financial</p>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <h3>🎯 Getting Started</h3>
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="step-num">1</span>
+              <p>Go to <strong>Transactions</strong> page</p>
+            </div>
+            <div class="guide-step">
+              <span class="step-num">2</span>
+              <p>Set your <strong>Opening Balance</strong> (starting capital)</p>
+            </div>
+            <div class="guide-step">
+              <span class="step-num">3</span>
+              <p>Add your first <strong>Income</strong> or <strong>Expense</strong></p>
+            </div>
+            <div class="guide-step">
+              <span class="step-num">4</span>
+              <p>Check the <strong>Dashboard</strong> to monitor your finances</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <h3>💰 Recording Transactions</h3>
+          <p><strong>Income</strong> = Money coming INTO your business (sales, payments received)</p>
+          <p><strong>Expense</strong> = Money going OUT of your business (supplies, rent, utilities)</p>
+          <div class="guide-example">
+            <strong>Example Income:</strong> "Sold 20 pieces of Leche Flan" - ₱1,000<br>
+            <strong>Example Expense:</strong> "Bought eggs at SM Hypermarket" - ₱450
+          </div>
+          <div class="guide-tip">
+            💡 <strong>Tip:</strong> Record transactions daily so you don't forget. Use clear descriptions!
+          </div>
+        </div>
+
+        <div class="guide-card highlight">
+          <h3>🧾 Recipe Costing - Real Example</h3>
+          <p>Here's how to calculate if your <strong>Leche Flan</strong> business is profitable:</p>
+          
+          <div class="recipe-example">
+            <div class="recipe-example-header">
+              <strong>🍮 Leche Flan (10 cups)</strong>
+              <span>Selling Price: ₱85 per cup</span>
+            </div>
+            
+            <div class="recipe-example-ingredients">
+              <strong>Ingredients (based on Philippine prices):</strong>
+              <table>
+                <tr><td>Egg yolks</td><td>12 pcs</td><td>₱84.00</td></tr>
+                <tr><td>Condensed milk</td><td>1 can (300ml)</td><td>₱65.00</td></tr>
+                <tr><td>Evaporated milk</td><td>1 can (370ml)</td><td>₱45.00</td></tr>
+                <tr><td>White sugar (caramel)</td><td>200g</td><td>₱20.00</td></tr>
+                <tr><td>Vanilla extract</td><td>1 tsp</td><td>₱15.00</td></tr>
+                <tr><td>Llanera cups</td><td>10 pcs</td><td>₱50.00</td></tr>
+                <tr><td>LPG gas usage</td><td>estimate</td><td>₱25.00</td></tr>
+                <tr class="total"><td><strong>TOTAL COST</strong></td><td></td><td><strong>₱304.00</strong></td></tr>
+              </table>
+            </div>
+
+            <div class="recipe-example-calc">
+              <div class="calc-row">
+                <span>Cost per cup:</span>
+                <span>₱304 ÷ 10 = <strong>₱30.40</strong></span>
+              </div>
+              <div class="calc-row">
+                <span>Selling price:</span>
+                <span><strong>₱85.00</strong></span>
+              </div>
+              <div class="calc-row success">
+                <span>Profit per cup:</span>
+                <span>₱85 - ₱30.40 = <strong>₱54.60</strong></span>
+              </div>
+              <div class="calc-row success">
+                <span>Profit margin:</span>
+                <span><strong>64.2%</strong> ✅ Excellent!</span>
+              </div>
+              <div class="calc-row highlight-row">
+                <span>If you sell all 10:</span>
+                <span>10 × ₱54.60 = <strong>₱546.00 profit</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="guide-tip">
+            💡 <strong>Target:</strong> Aim for 40-60% profit margin. Above 60% is excellent! Below 30% means you need to adjust prices or costs.
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <h3>🥟 Another Example: Siopao Asado</h3>
+          <div class="recipe-example mini">
+            <div class="recipe-example-header">
+              <strong>Siopao Asado (15 pieces)</strong>
+              <span>Selling: ₱25 each</span>
+            </div>
+            <div class="recipe-example-ingredients">
+              <table>
+                <tr><td>All-purpose flour</td><td>500g</td><td>₱45.00</td></tr>
+                <tr><td>Pork asado filling</td><td>300g</td><td>₱120.00</td></tr>
+                <tr><td>Yeast, sugar, salt</td><td></td><td>₱25.00</td></tr>
+                <tr><td>Cooking oil</td><td></td><td>₱15.00</td></tr>
+                <tr><td>LPG gas</td><td></td><td>₱30.00</td></tr>
+                <tr class="total"><td><strong>TOTAL</strong></td><td></td><td><strong>₱235.00</strong></td></tr>
+              </table>
+            </div>
+            <div class="recipe-example-calc">
+              <div class="calc-row">
+                <span>Cost per piece:</span>
+                <span>₱235 ÷ 15 = <strong>₱15.67</strong></span>
+              </div>
+              <div class="calc-row success">
+                <span>Profit per piece:</span>
+                <span>₱25 - ₱15.67 = <strong>₱9.33</strong></span>
+              </div>
+              <div class="calc-row success">
+                <span>Profit margin:</span>
+                <span><strong>37.3%</strong> ✅ Good!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <h3>📅 Daily Reports</h3>
+          <p>Use this to see how much you earn and spend each day:</p>
+          <ol>
+            <li>Select <strong>From</strong> and <strong>To</strong> dates</li>
+            <li>Click <strong>Generate Report</strong></li>
+            <li>Review each day's income vs expenses</li>
+          </ol>
+          <div class="guide-tip">
+            💡 <strong>Tip:</strong> Generate weekly reports every Sunday to track your business performance!
+          </div>
+        </div>
+
+        <div class="guide-card">
+          <h3>❓ Frequently Asked Questions</h3>
+          <div class="faq-list">
+            <div class="faq-item">
+              <strong>Where is my data saved?</strong>
+              <p>All data is stored on your device's browser. It's private and secure. No internet needed after first load.</p>
+            </div>
+            <div class="faq-item">
+              <strong>How do I backup my data?</strong>
+              <p>Click "Export Backup" in the sidebar. Do this weekly to avoid losing data.</p>
+            </div>
+            <div class="faq-item">
+              <strong>Can I use this on my phone?</strong>
+              <p>Yes! The app works on any device - phone, tablet, or computer.</p>
+            </div>
+            <div class="faq-item">
+              <strong>How do I know if I'm profitable?</strong>
+              <p>Check the Dashboard. If "Net Profit" is positive (green), you're making money!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-card highlight">
+          <h3>✅ Best Practices for Sison Business</h3>
+          <ol>
+            <li><strong>Record transactions DAILY</strong> - Don't wait until week end</li>
+            <li><strong>Use clear descriptions</strong> - "Sold 5 Leche Flan to Ate Mila" is better than "Sales"</li>
+            <li><strong>Check Dashboard WEEKLY</strong> - Every Sunday, review your week</li>
+            <li><strong>Update recipe costs</strong> - When ingredient prices change</li>
+            <li><strong>Export backup MONTHLY</strong> - Save your data safely</li>
+            <li><strong>Track ALL expenses</strong> - Including small ones like jeepney fare for deliveries</li>
+          </ol>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
