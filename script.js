@@ -32,6 +32,17 @@ const formatDate = str => {
 
 const today = () => new Date().toISOString().split('T')[0];
 
+const ICONS = {
+  plus: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`,
+  pencil: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
+  utensils: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>`,
+  inbox: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>`,
+  edit: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
+  trash: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+  eye: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  check: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>`,
+};
+
 // ===== TOAST =====
 const toast = (msg, type = 'success') => {
   const t = $('toast');
@@ -111,8 +122,24 @@ $('welcomeModal').addEventListener('click', e => {
   if (e.target.classList.contains('modal-backdrop')) hideWelcome();
 });
 
-// Help buttons
 $('mobileHelp').addEventListener('click', () => navigateTo('guide'));
+
+// ===== RECIPE MODAL =====
+const showRecipeModal = () => $('recipeModal').classList.add('active');
+const hideRecipeModal = () => $('recipeModal').classList.remove('active');
+
+$('closeRecipeModal').addEventListener('click', hideRecipeModal);
+$('recipeModal').addEventListener('click', e => {
+  if (e.target.classList.contains('modal-backdrop')) hideRecipeModal();
+});
+
+// ===== EMPTY STATE HELPER =====
+const emptyState = (msg) => `
+  <div class="empty-state">
+    <div class="empty-state-icon">${ICONS.inbox}</div>
+    ${msg}
+  </div>
+`;
 
 // ===== DASHBOARD =====
 const renderDashboard = () => {
@@ -129,7 +156,6 @@ const renderDashboard = () => {
   $('totalExpense').textContent = formatMoney(expense);
   $('currentBalance').textContent = formatMoney(balance);
   
-  // Today
   const todayStr = today();
   $('todayDate').textContent = formatDate(todayStr);
   
@@ -140,20 +166,18 @@ const renderDashboard = () => {
   
   $('todayIncome').textContent = formatMoney(todayInc);
   $('todayExpense').textContent = formatMoney(todayExp);
-  $('todayNet').textContent = '₱' + formatMoney(todayNet);
+  $('todayNet').textContent = '\u20B1' + formatMoney(todayNet);
   $('todayNet').className = `today-value ${todayNet >= 0 ? 'text-success' : 'text-danger'}`;
   
-  // Stats
   $('statsTransactions').textContent = state.transactions.length;
   $('statsRecipes').textContent = state.recipes.length;
   const days = new Set(state.transactions.map(t => t.date)).size;
   $('statsAvgExpense').textContent = formatMoney(days > 0 ? expense / days : 0);
   
-  // Recent
   const recent = [...state.transactions].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
   
   $('recentTransactions').innerHTML = recent.length === 0 
-    ? '<div class="empty-state">No transactions yet. Add your first one!</div>'
+    ? emptyState('No transactions yet. Add your first one!')
     : recent.map(t => `
       <div class="transaction-item">
         <div class="transaction-main">
@@ -166,7 +190,7 @@ const renderDashboard = () => {
             </div>
           </div>
           <div class="transaction-amount ${t.type === 'income' ? 'text-success' : 'text-danger'}">
-            ${t.type === 'expense' ? '-' : '+'}₱${formatMoney(t.amount)}
+            ${t.type === 'expense' ? '-' : '+'}\u20B1${formatMoney(t.amount)}
           </div>
         </div>
       </div>
@@ -222,7 +246,7 @@ const renderTransList = () => {
   const filtered = state.transactions.filter(matchFilters).sort((a, b) => new Date(b.date) - new Date(a.date));
   
   $('transactionsList').innerHTML = filtered.length === 0
-    ? '<div class="empty-state">No transactions found</div>'
+    ? emptyState('No transactions found')
     : filtered.map(t => `
       <div class="transaction-item">
         <div class="transaction-main">
@@ -236,12 +260,12 @@ const renderTransList = () => {
             </div>
           </div>
           <div class="transaction-amount ${t.type === 'income' ? 'text-success' : 'text-danger'}">
-            ${t.type === 'expense' ? '-' : '+'}₱${formatMoney(t.amount)}
+            ${t.type === 'expense' ? '-' : '+'}\u20B1${formatMoney(t.amount)}
           </div>
         </div>
         <div class="transaction-actions">
-          <button class="btn btn-sm btn-ghost" onclick="editTrans('${t.id}')">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteTrans('${t.id}')">Delete</button>
+          <button class="btn btn-sm btn-ghost" onclick="editTrans('${t.id}')">${ICONS.edit} Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteTrans('${t.id}')">${ICONS.trash} Delete</button>
         </div>
       </div>
     `).join('');
@@ -254,12 +278,17 @@ const renderTransactions = () => {
   renderTransList();
 };
 
+const setFormTitle = (icon, text) => {
+  $('formTitleIcon').innerHTML = icon;
+  $('formTitleText').textContent = text;
+};
+
 const resetTransForm = () => {
   $('transactionForm').reset();
   $('transDate').value = today();
   state.editingTransaction = null;
-  $('formTitle').textContent = '➕ Add Transaction';
-  $('transSubmit').textContent = 'Add Transaction';
+  setFormTitle(ICONS.plus, 'Add Transaction');
+  $('transSubmit').innerHTML = `${ICONS.plus} Add Transaction`;
   $('transCancel').style.display = 'none';
 };
 
@@ -275,8 +304,8 @@ window.editTrans = id => {
   $('transDescription').value = t.description;
   $('transNotes').value = t.notes || '';
   
-  $('formTitle').textContent = '✏️ Edit Transaction';
-  $('transSubmit').textContent = 'Update Transaction';
+  setFormTitle(ICONS.pencil, 'Edit Transaction');
+  $('transSubmit').innerHTML = `${ICONS.check} Update Transaction`;
   $('transCancel').style.display = 'block';
   
   navigateTo('transactions');
@@ -319,7 +348,6 @@ $('transactionForm').addEventListener('submit', e => {
 
 $('transCancel').addEventListener('click', resetTransForm);
 
-// Filters
 ['filterType', 'filterCategory', 'filterMonth', 'filterSearch'].forEach(id => {
   $(id).addEventListener('input', renderTransList);
   $(id).addEventListener('change', renderTransList);
@@ -333,7 +361,6 @@ $('resetFilters').addEventListener('click', () => {
   renderTransList();
 });
 
-// Opening balance
 $('openingBalance').addEventListener('change', () => {
   const val = parseFloat($('openingBalance').value) || 0;
   state.settings.openingBalance = Math.max(0, val);
@@ -342,7 +369,6 @@ $('openingBalance').addEventListener('change', () => {
   toast('Opening balance updated');
 });
 
-// Export
 $('exportTransactions').addEventListener('click', () => {
   if (!state.transactions.length) return toast('No transactions', 'error');
   
@@ -376,7 +402,7 @@ const calcRecipe = () => {
   
   $('recipeTotalCost').textContent = formatMoney(total);
   $('recipeCostPerUnit').textContent = formatMoney(costPer);
-  $('recipeProfitPerUnit').textContent = '₱' + formatMoney(profitPer);
+  $('recipeProfitPerUnit').textContent = '\u20B1' + formatMoney(profitPer);
   $('recipeProfitPerUnit').className = profitPer >= 0 ? 'text-success' : 'text-danger';
   $('recipeProfitMargin').textContent = margin.toFixed(1) + '%';
   $('recipeProfitMargin').className = margin >= 40 ? 'text-success' : margin >= 20 ? '' : 'text-danger';
@@ -384,15 +410,15 @@ const calcRecipe = () => {
 
 const renderIngredients = () => {
   $('ingredientsList').innerHTML = state.ingredients.length === 0
-    ? '<div class="empty-state" style="padding:1rem">No ingredients added</div>'
+    ? emptyState('No ingredients added')
     : state.ingredients.map((ing, i) => `
       <div class="ingredient-item">
         <div class="ingredient-info">
           <div class="ingredient-name">${ing.name}</div>
           <div class="ingredient-detail">${ing.qty} ${ing.unit}</div>
         </div>
-        <span class="ingredient-cost">₱${formatMoney(ing.cost)}</span>
-        <button class="btn btn-sm btn-danger" onclick="removeIng(${i})">Remove</button>
+        <span class="ingredient-cost">\u20B1${formatMoney(ing.cost)}</span>
+        <button class="btn btn-sm btn-danger" onclick="removeIng(${i})">${ICONS.trash} Remove</button>
       </div>
     `).join('');
   
@@ -429,11 +455,16 @@ $('addIngredient').addEventListener('click', () => {
 $('recipeYield').addEventListener('input', calcRecipe);
 $('recipePrice').addEventListener('input', calcRecipe);
 
+const setRecipeFormTitle = (icon, text) => {
+  $('recipeFormTitleIcon').innerHTML = icon;
+  $('recipeFormTitleText').textContent = text;
+};
+
 const resetRecipeForm = () => {
   $('recipeForm').reset();
   state.ingredients = [];
   state.editingRecipe = null;
-  $('recipeFormTitle').textContent = '🍳 Create Recipe';
+  setRecipeFormTitle(ICONS.utensils, 'Create Recipe');
   $('recipeSubmit').textContent = 'Save Recipe';
   $('recipeCancel').style.display = 'none';
   renderIngredients();
@@ -480,22 +511,22 @@ $('recipeCancel').addEventListener('click', resetRecipeForm);
 
 const renderRecipes = () => {
   $('recipesList').innerHTML = state.recipes.length === 0
-    ? '<div class="empty-state">No recipes saved yet</div>'
+    ? emptyState('No recipes saved yet')
     : state.recipes.map(r => `
       <div class="recipe-card">
         <h4>${r.name}</h4>
         <div class="recipe-stats">
           <div><span>Yield:</span> <strong>${r.yield} units</strong></div>
-          <div><span>Price:</span> <strong>₱${formatMoney(r.price)}</strong></div>
-          <div><span>Cost/unit:</span> <strong>₱${formatMoney(r.costPer)}</strong></div>
+          <div><span>Price:</span> <strong>\u20B1${formatMoney(r.price)}</strong></div>
+          <div><span>Cost/unit:</span> <strong>\u20B1${formatMoney(r.costPer)}</strong></div>
           <div class="${r.profitPer >= 0 ? 'text-success' : 'text-danger'}">
-            <span>Profit:</span> <strong>₱${formatMoney(r.profitPer)} (${r.margin.toFixed(1)}%)</strong>
+            <span>Profit:</span> <strong>\u20B1${formatMoney(r.profitPer)} (${r.margin.toFixed(1)}%)</strong>
           </div>
         </div>
         <div class="recipe-actions">
-          <button class="btn btn-sm btn-ghost" onclick="viewRecipe('${r.id}')">View</button>
-          <button class="btn btn-sm btn-ghost" onclick="editRecipe('${r.id}')">Edit</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteRecipe('${r.id}')">Delete</button>
+          <button class="btn btn-sm btn-ghost" onclick="viewRecipe('${r.id}')">${ICONS.eye} View</button>
+          <button class="btn btn-sm btn-ghost" onclick="editRecipe('${r.id}')">${ICONS.edit} Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteRecipe('${r.id}')">${ICONS.trash} Delete</button>
         </div>
       </div>
     `).join('');
@@ -505,7 +536,60 @@ window.viewRecipe = id => {
   const r = state.recipes.find(x => x.id === id);
   if (!r) return;
   
-  alert(`${r.name}\n\nYield: ${r.yield} units\nSelling Price: ₱${formatMoney(r.price)}\n\nIngredients:\n${r.ingredients.map(i => `• ${i.name}: ${i.qty} ${i.unit} - ₱${formatMoney(i.cost)}`).join('\n')}\n\nTotal Cost: ₱${formatMoney(r.totalCost)}\nCost per Unit: ₱${formatMoney(r.costPer)}\nProfit per Unit: ₱${formatMoney(r.profitPer)}\nProfit Margin: ${r.margin.toFixed(1)}%`);
+  const marginClass = r.margin >= 40 ? 'text-success' : r.margin >= 20 ? '' : 'text-danger';
+  
+  $('recipeModalBody').innerHTML = `
+    <div class="recipe-detail-header">
+      <div class="recipe-detail-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/>
+          <path d="M7 2v20"/>
+          <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>
+        </svg>
+      </div>
+      <div>
+        <h3>${r.name}</h3>
+        <p>Yield: ${r.yield} units | Selling: \u20B1${formatMoney(r.price)} each</p>
+      </div>
+    </div>
+    
+    <div class="recipe-detail-stats">
+      <div class="recipe-detail-stat">
+        <span>Total Cost</span>
+        <strong class="text-danger">\u20B1${formatMoney(r.totalCost)}</strong>
+      </div>
+      <div class="recipe-detail-stat">
+        <span>Cost/Unit</span>
+        <strong>\u20B1${formatMoney(r.costPer)}</strong>
+      </div>
+      <div class="recipe-detail-stat">
+        <span>Profit/Unit</span>
+        <strong class="${r.profitPer >= 0 ? 'text-success' : 'text-danger'}">\u20B1${formatMoney(r.profitPer)}</strong>
+      </div>
+      <div class="recipe-detail-stat">
+        <span>Margin</span>
+        <strong class="${marginClass}">${r.margin.toFixed(1)}%</strong>
+      </div>
+    </div>
+    
+    <div class="recipe-detail-ingredients">
+      <h4>Ingredients</h4>
+      <div class="recipe-detail-ing-list">
+        ${r.ingredients.map(i => `
+          <div class="recipe-detail-ing-item">
+            <span>${i.name} (${i.qty} ${i.unit})</span>
+            <span>\u20B1${formatMoney(i.cost)}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="recipe-detail-total">
+        <span>Total Ingredient Cost</span>
+        <span>\u20B1${formatMoney(r.totalCost)}</span>
+      </div>
+    </div>
+  `;
+  
+  showRecipeModal();
 };
 
 window.editRecipe = id => {
@@ -519,8 +603,8 @@ window.editRecipe = id => {
   $('recipeYield').value = r.yield;
   $('recipePrice').value = r.price;
   
-  $('recipeFormTitle').textContent = '✏️ Edit Recipe';
-  $('recipeSubmit').textContent = 'Update Recipe';
+  setRecipeFormTitle(ICONS.pencil, 'Edit Recipe');
+  $('recipeSubmit').innerHTML = `${ICONS.check} Update Recipe`;
   $('recipeCancel').style.display = 'block';
   
   renderIngredients();
@@ -580,7 +664,7 @@ $('dailyForm').addEventListener('submit', e => {
   if (dates.length === 0) {
     $('periodSummary').style.display = 'none';
     $('dailyCard').style.display = 'block';
-    $('dailyList').innerHTML = '<div class="empty-state">No transactions in this period</div>';
+    $('dailyList').innerHTML = emptyState('No transactions in this period');
     return;
   }
   
@@ -598,15 +682,15 @@ $('dailyForm').addEventListener('submit', e => {
         <div class="daily-stats-grid">
           <div class="daily-stat-item">
             <span class="daily-stat-label">Income</span>
-            <span class="daily-stat-value text-success">₱${formatMoney(d.income)}</span>
+            <span class="daily-stat-value text-success">\u20B1${formatMoney(d.income)}</span>
           </div>
           <div class="daily-stat-item">
             <span class="daily-stat-label">Expense</span>
-            <span class="daily-stat-value text-danger">₱${formatMoney(d.expense)}</span>
+            <span class="daily-stat-value text-danger">\u20B1${formatMoney(d.expense)}</span>
           </div>
           <div class="daily-stat-item">
             <span class="daily-stat-label">Net</span>
-            <span class="daily-stat-value ${net >= 0 ? 'text-success' : 'text-danger'}">₱${formatMoney(net)}</span>
+            <span class="daily-stat-value ${net >= 0 ? 'text-success' : 'text-danger'}">\u20B1${formatMoney(net)}</span>
           </div>
         </div>
       </div>
@@ -642,6 +726,53 @@ $('exportAll').addEventListener('click', () => {
   a.download = `sison-financial-backup-${today()}.json`;
   a.click();
   toast('Backup exported');
+});
+
+// ===== IMPORT BACKUP =====
+$('importAll').addEventListener('click', () => {
+  $('importFile').click();
+});
+
+$('importFile').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = evt => {
+    try {
+      const data = JSON.parse(evt.target.result);
+      
+      if (!data.transactions && !data.recipes) {
+        return toast('Invalid backup file', 'error');
+      }
+      
+      if (!confirm('This will replace all your current data. Continue?')) {
+        $('importFile').value = '';
+        return;
+      }
+      
+      if (data.transactions) {
+        state.transactions = data.transactions;
+        saveTrans();
+      }
+      if (data.recipes) {
+        state.recipes = data.recipes;
+        saveRecipes();
+      }
+      if (data.settings) {
+        state.settings = data.settings;
+        saveSettings();
+      }
+      
+      toast('Backup imported successfully');
+      navigateTo('dashboard');
+    } catch (err) {
+      toast('Failed to read backup file', 'error');
+    }
+    
+    $('importFile').value = '';
+  };
+  reader.readAsText(file);
 });
 
 // ===== INIT =====
